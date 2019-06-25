@@ -30,6 +30,7 @@ func main() {
 	echoServer.POST("/articles", handler.Insert)
 	echoServer.GET("/articles/:id", handler.Get)
 	echoServer.DELETE("/articles/:id", handler.Delete)
+	echoServer.PUT("/articles/:id", handler.Update)
 
 	// Start the server
 	echoServer.Start(":9090")

@@ -133,3 +133,36 @@ func (h ArticleHandler) Delete(c echo.Context) (err error) {
 
 	return c.JSON(http.StatusCreated, deletedID)
 }
+
+func (h ArticleHandler) Update(c echo.Context) (err error){
+	articleID := c.Param("id")
+	var item models.Article
+	err = c.Bind(&item)
+	if err != nil {
+		resp := ErroResponse{
+			Message: err.Error(),
+		}
+		return c.JSON(http.StatusUnprocessableEntity, resp)
+	}
+
+	query := `UPDATE article SET title=?, body=? WHERE id=?`
+	
+	dbRes, err := h.DB.Exec(query, item.Title, item.Body, articleID)
+	if err != nil {
+		resp := ErroResponse{
+			Message: err.Error(),
+		}
+		return c.JSON(http.StatusInternalServerError, resp)
+	}
+
+	updatedID, err := dbRes.RowsAffected()
+	if err != nil {
+		resp := ErroResponse{
+			Message: err.Error(),
+		}
+		return c.JSON(http.StatusInternalServerError, resp)
+	}
+
+	item.ID = fmt.Sprintf("%d", updatedID)
+	return c.JSON(http.StatusCreated, item)	
+}
