@@ -144,7 +144,8 @@ func (h ArticleHandler) Update(c echo.Context) (err error){
 		}
 		return c.JSON(http.StatusUnprocessableEntity, resp)
 	}
-
+	
+	item.ID = articleID
 	query := `UPDATE article SET title=?, body=? WHERE id=?`
 	
 	dbRes, err := h.DB.Exec(query, item.Title, item.Body, articleID)
@@ -155,7 +156,7 @@ func (h ArticleHandler) Update(c echo.Context) (err error){
 		return c.JSON(http.StatusInternalServerError, resp)
 	}
 
-	updatedID, err := dbRes.RowsAffected()
+	totalUpdated, err := dbRes.RowsAffected()
 	if err != nil {
 		resp := ErroResponse{
 			Message: err.Error(),
@@ -163,6 +164,12 @@ func (h ArticleHandler) Update(c echo.Context) (err error){
 		return c.JSON(http.StatusInternalServerError, resp)
 	}
 
-	item.ID = fmt.Sprintf("%d", updatedID)
+	if totalUpdated <= 0 {
+		resp := ErroResponse{
+			Message: "Nothing is changed",
+		}
+		return c.JSON(http.StatusInternalServerError, resp)
+	}
+
 	return c.JSON(http.StatusCreated, item)	
 }
